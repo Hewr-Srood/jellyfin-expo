@@ -1,299 +1,313 @@
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import compareVersions from 'compare-versions';
-import { action } from 'mobx';
-import { observer } from 'mobx-react-lite';
-import React, { useContext, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Alert, Platform, SectionList, StyleSheet, View } from 'react-native';
-import { Text, ThemeContext } from 'react-native-elements';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// /**
+//  * This Source Code Form is subject to the terms of the Mozilla Public
+//  * License, v. 2.0. If a copy of the MPL was not distributed with this
+//  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+//  */
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { useNavigation } from '@react-navigation/native';
+// import compareVersions from 'compare-versions';
+// import { action } from 'mobx';
+// import { observer } from 'mobx-react-lite';
+// import React, { useContext, useEffect } from 'react';
+// import { useTranslation } from 'react-i18next';
+// import { Alert, Platform, SectionList, StyleSheet, View } from 'react-native';
+// import { Text, ThemeContext } from 'react-native-elements';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 
-import AppInfoFooter from '../components/AppInfoFooter';
-import BrowserListItem from '../components/BrowserListItem';
-import ButtonListItem from '../components/ButtonListItem';
-import ServerListItem from '../components/ServerListItem';
-import SwitchListItem from '../components/SwitchListItem';
-import Links from '../constants/Links';
-import Screens from '../constants/Screens';
-import { useStores } from '../hooks/useStores';
-import { isSystemThemeSupported } from '../utils/Device';
+// import AppInfoFooter from '../components/AppInfoFooter';
+// import BrowserListItem from '../components/BrowserListItem';
+// import ButtonListItem from '../components/ButtonListItem';
+// import ServerListItem from '../components/ServerListItem';
+// import SwitchListItem from '../components/SwitchListItem';
+// import Links from '../constants/Links';
+// import Screens from '../constants/Screens';
+// import { useStores } from '../hooks/useStores';
+// import { isSystemThemeSupported } from '../utils/Device';
 
-const SettingsScreen = observer(() => {
-	const { rootStore } = useStores();
-	const navigation = useNavigation();
-	const { t } = useTranslation();
-	const { theme } = useContext(ThemeContext);
+// const SettingsScreen = observer(() => {
+// 	const { rootStore } = useStores();
+// 	const navigation = useNavigation();
+// 	const { t } = useTranslation();
+// 	const { theme } = useContext(ThemeContext);
 
-	useEffect(() => {
-		// Fetch server info
-		rootStore.serverStore.fetchInfo();
-	}, []);
+// 	useEffect(() => {
+// 		// Fetch server info
+// 		rootStore.serverStore.fetchInfo();
+// 	}, []);
 
-	const onAddServer = () => {
-		navigation.navigate(Screens.AddServerScreen);
-	};
+// 	const onAddServer = () => {
+// 		navigation.navigate(Screens.AddServerScreen);
+// 	};
 
-	const onDeleteServer = index => {
-		Alert.alert(
-			t('alerts.deleteServer.title'),
-			t('alerts.deleteServer.description', { serverName: rootStore.serverStore.servers[index]?.name }),
-			[
-				{ text: t('common.cancel') },
-				{
-					text: t('alerts.deleteServer.confirm'),
-					onPress: action(() => {
-						// Remove server and update active server
-						rootStore.serverStore.removeServer(index);
-						rootStore.settingStore.activeServer = 0;
+// 	const onDeleteServer = index => {
+// 		Alert.alert(
+// 			t('alerts.deleteServer.title'),
+// 			t('alerts.deleteServer.description', { serverName: rootStore.serverStore.servers[index]?.name }),
+// 			[
+// 				{ text: t('common.cancel') },
+// 				{
+// 					text: t('alerts.deleteServer.confirm'),
+// 					onPress: action(() => {
+// 						// Remove server and update active server
+// 						rootStore.serverStore.removeServer(index);
+// 						rootStore.settingStore.activeServer = 0;
 
-						if (rootStore.serverStore.servers.length > 0) {
-							// More servers exist, navigate home
-							navigation.replace(Screens.HomeScreen);
-							navigation.navigate(Screens.HomeTab);
-						} else {
-							// No servers are present, navigate to add server screen
-							navigation.replace(Screens.AddServerScreen);
-						}
-					}),
-					style: 'destructive'
-				}
-			]
-		);
-	};
+// 						if (rootStore.serverStore.servers.length > 0) {
+// 							// More servers exist, navigate home
+// 							navigation.replace(Screens.HomeScreen);
+// 							navigation.navigate(Screens.HomeTab);
+// 						} else {
+// 							// No servers are present, navigate to add server screen
+// 							navigation.replace(Screens.AddServerScreen);
+// 						}
+// 					}),
+// 					style: 'destructive'
+// 				}
+// 			]
+// 		);
+// 	};
 
-	const onSelectServer = action(index => {
-		rootStore.settingStore.activeServer = index;
-		navigation.replace(Screens.HomeScreen);
-		navigation.navigate(Screens.HomeTab);
-	});
+// 	const onSelectServer = action(index => {
+// 		rootStore.settingStore.activeServer = index;
+// 		navigation.replace(Screens.HomeScreen);
+// 		navigation.navigate(Screens.HomeTab);
+// 	});
 
-	const onResetApplication = () => {
-		Alert.alert(
-			t('alerts.resetApplication.title'),
-			t('alerts.resetApplication.description'),
-			[
-				{ text: t('common.cancel') },
-				{
-					text: t('alerts.resetApplication.confirm'),
-					onPress: action(() => {
-						// Reset data in stores
-						rootStore.reset();
-						AsyncStorage.clear();
-						// Navigate to the loading screen
-						navigation.replace(Screens.AddServerScreen);
-					}),
-					style: 'destructive'
-				}
-			]
-		);
-	};
+// 	const onResetApplication = () => {
+// 		Alert.alert(
+// 			t('alerts.resetApplication.title'),
+// 			t('alerts.resetApplication.description'),
+// 			[
+// 				{ text: t('common.cancel') },
+// 				{
+// 					text: t('alerts.resetApplication.confirm'),
+// 					onPress: action(() => {
+// 						// Reset data in stores
+// 						rootStore.reset();
+// 						AsyncStorage.clear();
+// 						// Navigate to the loading screen
+// 						navigation.replace(Screens.AddServerScreen);
+// 					}),
+// 					style: 'destructive'
+// 				}
+// 			]
+// 		);
+// 	};
 
-	const AugmentedServerListItem = (props) => (
-		<ServerListItem
-			{...props}
-			activeServer={rootStore.settingStore.activeServer}
-			onDelete={onDeleteServer}
-			onPress={onSelectServer}
-		/>
-	);
+// 	const AugmentedServerListItem = (props) => (
+// 		<ServerListItem
+// 			{...props}
+// 			activeServer={rootStore.settingStore.activeServer}
+// 			onDelete={onDeleteServer}
+// 			onPress={onSelectServer}
+// 		/>
+// 	);
 
-	const getSections = () => {
-		const settingsData = [{
-			key: 'keep-awake-switch',
-			title: t('settings.keepAwake'),
-			value: rootStore.settingStore.isScreenLockEnabled,
-			onValueChange: action(value => rootStore.settingStore.isScreenLockEnabled = value)
-		}];
+// 	const getSections = () => {
+// 		const settingsData = [{
+// 			key: 'keep-awake-switch',
+// 			title: t('settings.keepAwake'),
+// 			value: rootStore.settingStore.isScreenLockEnabled,
+// 			onValueChange: action(value => rootStore.settingStore.isScreenLockEnabled = value)
+// 		}];
 
-		// Orientation lock is not supported on iPad without disabling multitasking
-		// https://docs.expo.io/versions/latest/sdk/screen-orientation/#warning
-		if (Platform.OS !== 'ios' || !Platform.isPad) {
-			settingsData.push({
-				key: 'rotation-lock-switch',
-				title: t('settings.rotationLock'),
-				value: rootStore.settingStore.isRotationLockEnabled,
-				onValueChange: action(value => rootStore.settingStore.isRotationLockEnabled = value)
-			});
-		}
+// 		// Orientation lock is not supported on iPad without disabling multitasking
+// 		// https://docs.expo.io/versions/latest/sdk/screen-orientation/#warning
+// 		if (Platform.OS !== 'ios' || !Platform.isPad) {
+// 			settingsData.push({
+// 				key: 'rotation-lock-switch',
+// 				title: t('settings.rotationLock'),
+// 				value: rootStore.settingStore.isRotationLockEnabled,
+// 				onValueChange: action(value => rootStore.settingStore.isRotationLockEnabled = value)
+// 			});
+// 		}
 
-		const playbackSettingsData = [];
+// 		const playbackSettingsData = [];
 
-		// TODO: Add Android support for native video player
-		if (Platform.OS === 'ios') {
-			playbackSettingsData.push({
-				key: 'native-video-switch',
-				title: t('settings.nativeVideoPlayer'),
-				badge: {
-					value: t('common.beta')
-				},
-				subtitle: t('settings.minimumServerVersion'),
-				value: rootStore.settingStore.isNativeVideoPlayerEnabled,
-				onValueChange: action(value => {
-					rootStore.settingStore.isNativeVideoPlayerEnabled = value;
-					rootStore.isReloadRequired = true;
-				})
-			});
+// 		// TODO: Add Android support for native video player
+// 		if (Platform.OS === 'ios') {
+// 			playbackSettingsData.push({
+// 				key: 'native-video-switch',
+// 				title: t('settings.nativeVideoPlayer'),
+// 				badge: {
+// 					value: t('common.beta')
+// 				},
+// 				subtitle: t('settings.minimumServerVersion'),
+// 				value: rootStore.settingStore.isNativeVideoPlayerEnabled,
+// 				onValueChange: action(value => {
+// 					rootStore.settingStore.isNativeVideoPlayerEnabled = value;
+// 					rootStore.isReloadRequired = true;
+// 				})
+// 			});
 
-			if (compareVersions.compare(Platform.Version, '12', '>')) {
-				playbackSettingsData.push({
-					key: 'native-video-fmp4-switch',
-					title: t('settings.fmp4Support'),
-					value: rootStore.settingStore.isFmp4Enabled,
-					disabled: !rootStore.settingStore.isNativeVideoPlayerEnabled,
-					onValueChange: action(value => {
-						rootStore.settingStore.isFmp4Enabled = value;
-						rootStore.isReloadRequired = true;
-					})
-				});
-			}
-		}
+// 			if (compareVersions.compare(Platform.Version, '12', '>')) {
+// 				playbackSettingsData.push({
+// 					key: 'native-video-fmp4-switch',
+// 					title: t('settings.fmp4Support'),
+// 					value: rootStore.settingStore.isFmp4Enabled,
+// 					disabled: !rootStore.settingStore.isNativeVideoPlayerEnabled,
+// 					onValueChange: action(value => {
+// 						rootStore.settingStore.isFmp4Enabled = value;
+// 						rootStore.isReloadRequired = true;
+// 					})
+// 				});
+// 			}
+// 		}
 
-		const appearanceSettingsData = [{
-			key: 'tab-labels-switch',
-			title: t('settings.tabLabels'),
-			value: rootStore.settingStore.isTabLabelsEnabled,
-			onValueChange: action(value => rootStore.settingStore.isTabLabelsEnabled = value)
-		}];
+// 		const appearanceSettingsData = [{
+// 			key: 'tab-labels-switch',
+// 			title: t('settings.tabLabels'),
+// 			value: rootStore.settingStore.isTabLabelsEnabled,
+// 			onValueChange: action(value => rootStore.settingStore.isTabLabelsEnabled = value)
+// 		}];
 
-		if (isSystemThemeSupported()) {
-			appearanceSettingsData.push({
-				key: 'system-theme-switch',
-				title: t('settings.systemTheme'),
-				value: rootStore.settingStore.isSystemThemeEnabled,
-				onValueChange: action(value => rootStore.settingStore.isSystemThemeEnabled = value)
-			});
-		}
+// 		if (isSystemThemeSupported()) {
+// 			appearanceSettingsData.push({
+// 				key: 'system-theme-switch',
+// 				title: t('settings.systemTheme'),
+// 				value: rootStore.settingStore.isSystemThemeEnabled,
+// 				onValueChange: action(value => rootStore.settingStore.isSystemThemeEnabled = value)
+// 			});
+// 		}
 
-		// TODO: This should be able to select from a list not just a switch
-		appearanceSettingsData.push({
-			key: 'theme-switch',
-			title: t('settings.lightTheme'),
-			disabled: rootStore.settingStore.isSystemThemeEnabled,
-			value: rootStore.settingStore.themeId === 'light',
-			onValueChange: action(value => rootStore.settingStore.themeId = value ? 'light' : 'dark')
-		});
+// 		// TODO: This should be able to select from a list not just a switch
+// 		appearanceSettingsData.push({
+// 			key: 'theme-switch',
+// 			title: t('settings.lightTheme'),
+// 			disabled: rootStore.settingStore.isSystemThemeEnabled,
+// 			value: rootStore.settingStore.themeId === 'light',
+// 			onValueChange: action(value => rootStore.settingStore.themeId = value ? 'light' : 'dark')
+// 		});
 
-		return [
-			{
-				title: t('headings.servers'),
-				data: rootStore.serverStore.servers.slice(),
-				keyExtractor: (item, index) => `server-${index}`,
-				renderItem: AugmentedServerListItem
-			},
-			{
-				title: t('headings.addServer'),
-				hideHeader: true,
-				data: [{
-					key: 'add-server-button',
-					title: t('headings.addServer'),
-					onPress: onAddServer
-				}],
-				renderItem: ButtonListItem
-			},
-			{
-				title: t('headings.settings'),
-				data: settingsData,
-				renderItem: SwitchListItem
-			},
-			{
-				title: t('headings.playback'),
-				data: playbackSettingsData,
-				renderItem: SwitchListItem
-			},
-			{
-				title: t('headings.appearance'),
-				data: appearanceSettingsData,
-				renderItem: SwitchListItem
-			},
-			{
-				title: t('headings.links'),
-				data: Links.map(link => ({
-					...link,
-					name: t(link.name)
-				})),
-				renderItem: BrowserListItem
-			},
-			{
-				title: t('alerts.resetApplication.title'),
-				hideHeader: true,
-				data: [{
-					key: 'reset-app-button',
-					title: t('alerts.resetApplication.title'),
-					titleStyle: {
-						color: theme.colors.error
-					},
-					onPress: onResetApplication
-				}],
-				renderItem: ButtonListItem
-			}
-		];
-	};
+// 		return [
+// 			// {
+// 			// 	title: t('headings.servers'),
+// 			// 	data: rootStore.serverStore.servers.slice(),
+// 			// 	keyExtractor: (item, index) => `server-${index}`,
+// 			// 	renderItem: AugmentedServerListItem
+// 			// },
+// 			// {
+// 			// 	title: t('headings.addServer'),
+// 			// 	hideHeader: true,
+// 			// 	data: [{
+// 			// 		key: 'add-server-button',
+// 			// 		title: t('headings.addServer'),
+// 			// 		onPress: onAddServer
+// 			// 	}],
+// 			// 	renderItem: ButtonListItem
+// 			// },
+// 			{
+// 				title: t('headings.settings'),
+// 				data: settingsData,
+// 				renderItem: SwitchListItem
+// 			},
+// 			// {
+// 			// 	title: t('headings.playback'),
+// 			// 	data: playbackSettingsData,
+// 			// 	renderItem: SwitchListItem
+// 			// },
+// 			{
+// 				title: t('headings.appearance'),
+// 				data: appearanceSettingsData,
+// 				renderItem: SwitchListItem
+// 			}
+// 			// {
+// 			// 	title: t('headings.links'),
+// 			// 	data: Links.map(link => ({
+// 			// 		...link,
+// 			// 		name: t(link.name)
+// 			// 	})),
+// 			// 	renderItem: BrowserListItem
+// 			// },
+// 			// {
+// 			// 	title: t('alerts.resetApplication.title'),
+// 			// 	hideHeader: true,
+// 			// 	data: [{
+// 			// 		key: 'reset-app-button',
+// 			// 		title: t('alerts.resetApplication.title'),
+// 			// 		titleStyle: {
+// 			// 			color: theme.colors.error
+// 			// 		},
+// 			// 		onPress: onResetApplication
+// 			// 	}],
+// 			// 	renderItem: ButtonListItem
+// 			// }
+// 		];
+// 	};
 
+// 	return (
+// 		<SafeAreaView
+// 			style={{
+// 				...styles.container,
+// 				backgroundColor: theme.colors.background
+// 			}}
+// 			edges={[ 'right', 'left' ]}
+// 		>
+// 			<SectionList
+// 				sections={getSections()}
+// 				extraData={{
+// 					activeServer: rootStore.settingStore.activeServer,
+// 					isFetching: rootStore.serverStore.fetchInfo.pending
+// 				}}
+// 				renderItem={({ item }) => <Text>{JSON.stringify(item)}</Text>}
+// 				renderSectionHeader={({ section: { data, title, hideHeader } }) => {
+// 					if (!data || data.length === 0) {
+// 						return null;
+// 					}
+// 					if (hideHeader) {
+// 						return <View style={styles.emptyHeader} />;
+// 					}
+// 					return (
+// 						<Text style={{
+// 							...styles.header,
+// 							backgroundColor: theme.colors.background,
+// 							color: theme.colors.grey1
+// 						}}>{title}</Text>
+// 					);
+// 				}}
+// 				renderSectionFooter={({ section: { data } }) => {
+// 					if (!data || data.length === 0) {
+// 						return null;
+// 					}
+// 					return <View style={styles.footer} />;
+// 				}}
+// 				// ListFooterComponent={AppInfoFooter}
+// 				showsVerticalScrollIndicator={false}
+// 			/>
+// 		</SafeAreaView>
+// 	);
+// });
+
+// const styles = StyleSheet.create({
+// 	container: {
+// 		flex: 1
+// 	},
+// 	header: {
+// 		fontWeight: '600',
+// 		paddingVertical: 8,
+// 		paddingHorizontal: 15,
+// 		marginBottom: 1
+// 	},
+// 	emptyHeader: {
+// 		marginTop: 15
+// 	},
+// 	footer: {
+// 		marginBottom: 15
+// 	}
+// });
+
+// export default SettingsScreen;
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+const SettingsScreen = () => {
 	return (
-		<SafeAreaView
-			style={{
-				...styles.container,
-				backgroundColor: theme.colors.background
-			}}
-			edges={[ 'right', 'left' ]}
-		>
-			<SectionList
-				sections={getSections()}
-				extraData={{
-					activeServer: rootStore.settingStore.activeServer,
-					isFetching: rootStore.serverStore.fetchInfo.pending
-				}}
-				renderItem={({ item }) => <Text>{JSON.stringify(item)}</Text>}
-				renderSectionHeader={({ section: { data, title, hideHeader } }) => {
-					if (!data || data.length === 0) {
-						return null;
-					}
-					if (hideHeader) {
-						return <View style={styles.emptyHeader} />;
-					}
-					return (
-						<Text style={{
-							...styles.header,
-							backgroundColor: theme.colors.background,
-							color: theme.colors.grey1
-						}}>{title}</Text>
-					);
-				}}
-				renderSectionFooter={({ section: { data } }) => {
-					if (!data || data.length === 0) {
-						return null;
-					}
-					return <View style={styles.footer} />;
-				}}
-				ListFooterComponent={AppInfoFooter}
-				showsVerticalScrollIndicator={false}
-			/>
-		</SafeAreaView>
+		<View>
+	  <Text>SettingsScreen</Text>
+		</View>
 	);
-});
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1
-	},
-	header: {
-		fontWeight: '600',
-		paddingVertical: 8,
-		paddingHorizontal: 15,
-		marginBottom: 1
-	},
-	emptyHeader: {
-		marginTop: 15
-	},
-	footer: {
-		marginBottom: 15
-	}
-});
+};
 
 export default SettingsScreen;
+
+const styles = StyleSheet.create({});

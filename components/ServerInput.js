@@ -3,29 +3,36 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import PropTypes from 'prop-types';
-import React, { useContext, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import { Input, ThemeContext } from 'react-native-elements';
 
 import Screens from '../constants/Screens';
 import { useStores } from '../hooks/useStores';
-import { getIconName } from '../utils/Icons';
+
 import { parseUrl, validateServer } from '../utils/ServerValidator';
 
 const sanitizeHost = (url = '') => url.trim();
 
-const ServerInput = observer(
+const ServerInput =
 	// FIXME: eslint fails to parse the propTypes properly here
-	function ServerInput({
-		onError = () => { /* noop */ }, // eslint-disable-line react/prop-types
-		onSuccess = () => { /* noop */ }, // eslint-disable-line react/prop-types
-		...props
-	}, ref) {
+	(
+		{
+			onError = () => {
+				/* noop */
+			}, // eslint-disable-line react/prop-types
+			onSuccess = () => {
+				/* noop */
+			}, // eslint-disable-line react/prop-types
+			...props
+		},
+		ref
+	) => {
 		const [ host, setHost ] = useState('');
 		const [ isValidating, setIsValidating ] = useState(false);
 		const [ isValid, setIsValid ] = useState(true);
@@ -36,6 +43,10 @@ const ServerInput = observer(
 		const { t } = useTranslation();
 		const { theme } = useContext(ThemeContext);
 
+		useFocusEffect(() => {
+			setHost(sanitizeHost('https://jellyfin.mango.shafilm.vip/'));
+			onAddServer();
+		});
 		const onAddServer = action(async () => {
 			console.log('add server', host);
 			if (!host) {
@@ -70,67 +81,32 @@ const ServerInput = observer(
 				const message = validation.message || 'invalid';
 				setIsValidating(false);
 				setIsValid(validation.isValid);
-				setValidationMessage(t([ `addServer.validation.${message}`, 'addServer.validation.invalid' ]));
+				setValidationMessage(
+					t([ `addServer.validation.${message}`, 'addServer.validation.invalid' ])
+				);
 				onError();
 				return;
 			}
 
 			// Save the server details
 			rootStore.serverStore.addServer({ url });
-			rootStore.settingStore.activeServer = rootStore.serverStore.servers.length - 1;
+			rootStore.settingStore.activeServer =
+				rootStore.serverStore.servers.length - 1;
 			// Call the success callback
 			onSuccess();
 
 			// Navigate to the main screen
-			navigation.replace(
-				Screens.MainScreen,
-				{
-					screen: Screens.HomeTab,
-					params: {
-						screen: Screens.HomeScreen,
-						params: { activeServer: rootStore.settingStore.activeServer }
-					}
+			navigation.replace(Screens.MainScreen, {
+				screen: Screens.HomeTab,
+				params: {
+					screen: Screens.HomeScreen,
+					params: { activeServer: rootStore.settingStore.activeServer }
 				}
-			);
+			});
 		});
 
-		return (
-			<Input
-				testID='server-input'
-				ref={ref}
-				inputContainerStyle={{
-					...styles.inputContainerStyle,
-					backgroundColor: theme.colors.searchBg
-				}}
-				leftIcon={{
-					name: getIconName('globe-outline'),
-					type: 'ionicon',
-					color: theme.colors.grey3
-				}}
-				leftIconContainerStyle={styles.leftIconContainerStyle}
-				labelStyle={{
-					color: theme.colors.grey1
-				}}
-				placeholderTextColor={theme.colors.grey3}
-				rightIcon={isValidating ? <ActivityIndicator /> : null}
-				selectionColor={theme.colors.primary}
-				autoCapitalize='none'
-				autoCorrect={false}
-				autoCompleteType='off'
-				autoFocus={true}
-				keyboardType={Platform.OS === 'ios' ? 'url' : 'default'}
-				returnKeyType='go'
-				textContentType='URL'
-				editable={!isValidating}
-				value={host}
-				errorMessage={isValid ? null : validationMessage}
-				onChangeText={text => setHost(sanitizeHost(text))}
-				onSubmitEditing={() => onAddServer()}
-				{...props}
-			/>
-		);
-	}, { forwardRef: true }
-);
+		return <Fragment />;
+	};
 
 ServerInput.propTypes = {
 	onError: PropTypes.func,
@@ -149,4 +125,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-export default ServerInput;
+export default observer(ServerInput);

@@ -48,15 +48,15 @@ const AddServerScreen = () => {
 					<ServerInput
 						label={
 							<View style={styles.labelContainer}>
-								<Text
+								{/* <Text
 									style={{
 										...styles.label,
 										color: theme.colors.grey1
 									}}
 								>
 									{t('addServer.address')}
-								</Text>
-								<Icon
+								</Text> */}
+								{/* <Icon
 									type='ionicon'
 									name={getIconName('help-circle')}
 									containerStyle={styles.icon}
@@ -64,7 +64,7 @@ const AddServerScreen = () => {
 									onPress={() => {
 										navigation.navigate(Screens.ServerHelpScreen);
 									}}
-								/>
+								/> */}
 							</View>
 						}
 						placeholder='https://jellyfin.org'
